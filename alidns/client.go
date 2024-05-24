@@ -23,22 +23,31 @@ func newClient(region string, cred auth.Credential) (*Client, error) {
 	return &Client{dnsc: client}, nil
 }
 
-func (c *Client) getHostedZone(zone string) (string, error) {
+func (c *Client) getHostedZoneByFqdn(fqdn string) (string, error) {
 	request := alidns.CreateDescribeDomainsRequest()
-	request.KeyWord = util.UnFqdn(zone)
-	request.SearchMode = "EXACT"
 
-	response, err := c.dnsc.DescribeDomains(request)
-	if err != nil {
-		return "", err
+	domain := util.UnFqdn(fqdn)
+	for i := len(domain) - 2; i >= 0; i-- {
+		if domain[i] != '.' {
+			continue
+		}
+		request.KeyWord = domain[i+1:]
+		request.SearchMode = "EXACT"
+
+		response, err := c.dnsc.DescribeDomains(request)
+		if err != nil {
+			return "", err
+		}
+
+		zones := response.Domains.Domain
+		if len(zones) == 0 {
+			continue
+		}
+
+		return zones[0].DomainName, nil
 	}
 
-	zones := response.Domains.Domain
-	if len(zones) == 0 {
-		return "", fmt.Errorf("zone %s does not exist", zone)
-	}
-
-	return zones[0].DomainName, nil
+	return "", fmt.Errorf("cloud not find zone for: %s", fqdn)
 }
 
 func (c *Client) addTxtRecord(zone, rr, value string) error {

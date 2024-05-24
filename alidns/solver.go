@@ -52,7 +52,7 @@ func (s *Solver) Present(ch *v1alpha1.ChallengeRequest) error {
 		return err
 	}
 
-	zoneName, err := client.getHostedZone(ch.ResolvedZone)
+	zoneName, err := client.getHostedZoneByFqdn(ch.ResolvedZone)
 	if err != nil {
 		klog.Errorf("Get hosted zone %v error: %v", ch.ResolvedZone, err)
 		return err
@@ -104,7 +104,7 @@ func (s *Solver) getCredential(cfg *Config, ns string) (*credentials.AccessKeyCr
 }
 
 func (s *Solver) getSecretData(selector cmmetav1.SecretKeySelector, ns string) ([]byte, error) {
-	secret, err := s.client.CoreV1().Secrets(ns).Get(context.TODO(),selector.Name, metav1.GetOptions{})
+	secret, err := s.client.CoreV1().Secrets(ns).Get(context.TODO(), selector.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to load secret %q", ns+"/"+selector.Name)
 	}
@@ -130,7 +130,7 @@ func (s *Solver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
 		return err
 	}
 
-	zoneName, err := client.getHostedZone(ch.ResolvedZone)
+	zoneName, err := client.getHostedZoneByFqdn(ch.ResolvedFQDN)
 	if err != nil {
 		klog.Errorf("Get hosted zone %v error: %v", ch.ResolvedZone, err)
 		return err
