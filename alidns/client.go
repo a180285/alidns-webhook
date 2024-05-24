@@ -26,7 +26,8 @@ func newClient(region string, cred auth.Credential) (*Client, error) {
 func (c *Client) getHostedZoneByFqdn(fqdn string) (string, error) {
 	request := alidns.CreateDescribeDomainsRequest()
 
-	domain := util.UnFqdn(fqdn)
+	// in case fqdn is zone
+	domain := "." + util.UnFqdn(fqdn)
 	for i := len(domain) - 2; i >= 0; i-- {
 		if domain[i] != '.' {
 			continue
