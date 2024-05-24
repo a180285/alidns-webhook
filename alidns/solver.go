@@ -52,9 +52,9 @@ func (s *Solver) Present(ch *v1alpha1.ChallengeRequest) error {
 		return err
 	}
 
-	zoneName, err := client.getHostedZoneByFqdn(ch.ResolvedZone)
+	zoneName, err := client.getHostedZoneByFqdn(ch.ResolvedFQDN)
 	if err != nil {
-		klog.Errorf("Get hosted zone %v error: %v", ch.ResolvedZone, err)
+		klog.Errorf("Get hosted fqdn %v error: %v", ch.ResolvedFQDN, err)
 		return err
 	}
 
